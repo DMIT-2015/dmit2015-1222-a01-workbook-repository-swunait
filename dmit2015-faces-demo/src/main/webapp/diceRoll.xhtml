@@ -1,0 +1,135 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:faces="jakarta.faces"
+        xmlns:ui="jakarta.faces.facelets"
+        xmlns:f="jakarta.faces.core"
+        xmlns:h="jakarta.faces.html"
+        xmlns:pt="jakarta.faces.passthrough"
+        xmlns:cc="jakarta.faces.composite"
+        xmlns:c="jakarta.tags.core"
+        xmlns:fn="jakarta.tags.functions"
+        xmlns:o="http://omnifaces.org/ui"
+        xmlns:of="http://omnifaces.org/functions"
+        xmlns:p="http://primefaces.org/ui"
+        template="/WEB-INF/faces-templates/layout.xhtml"
+>
+
+    <ui:param name="title" value="Dice Roll"/>
+
+    <ui:define name="maincontent">
+        <!-- If FacesContext message sent from init() method annotated with @PostConstruct in the Faces backing bean class are not shown on page:
+            1) Remove the @PostConstruct annotation from the Faces backing bean class
+            2) Add metadata tag shown below to execute the init() method
+        <f:metadata>
+            <f:viewParam name="dummy" />
+            <f:event type="postInvokeAction" listener="#{currentBeanView.init}" />
+        </f:metadata>
+        -->
+
+        <h1>Rice Roll</h1>
+
+        <p:graphicImage value="#{resource['img/delapouite/dice-fire.png']}"
+                        alt="Dice Image"
+                        width="200px"
+                        height="200px"
+        />
+        <img src="#{resource['img/delapouite/dice-fire.png']}"
+                        alt="Dice Image"
+                        width="200px"
+                        height="200px"
+        />
+
+
+        <!--Display all messages in FacesContext -->
+        <p:messages id="messages"/>
+        <p:growl id="growl"/>
+
+        <h:form prependId="false">
+
+            <!--Example on conditional rendering, you will need to change the rendered attribute value to an EL value expression -->
+            <p:outputPanel id="outputPanel">
+                <p:graphicImage value="#{currentDiceRollViewScopedView.currentDiceFaceValueImage}"
+                        rendered="#{not empty currentDiceRollViewScopedView.currentDiceFaceValue}"
+                        width="120px"
+                        height="120px"
+                        alt="Dice Face Value #{currentDiceRollViewScopedView.currentDiceFaceValue}"
+                />
+            </p:outputPanel>
+
+            <p:focus context="formPanel"/>
+
+            <p:panel id="formPanel" header="Form Panel">
+                <div class="ui-fluid">
+
+                <div class="field">
+                    <p:outputLabel for="@next" >Bet Amount</p:outputLabel>
+                    <p:inputText id="betAmount" value="#{currentDiceRollViewScopedView.betAmount}"/>
+                </div>
+                <div class="field col-12 md:col-3">
+                    <p:outputLabel for="@next" value="Select Your Bet Face Value"/>
+                    <p:selectOneMenu id="betFaceValue" value="#{currentDiceRollViewScopedView.betFaceValue}">
+                        <f:selectItem itemLabel="1" itemValue="1"/>
+                        <f:selectItem itemLabel="2" itemValue="2"/>
+                        <f:selectItem itemLabel="3" itemValue="3"/>
+                        <f:selectItem itemLabel="4" itemValue="4"/>
+                        <f:selectItem itemLabel="5" itemValue="5"/>
+                        <f:selectItem itemLabel="6" itemValue="6"/>
+                    </p:selectOneMenu>
+                </div>
+                    <!--                    <div class="field ">-->
+                    <!--                        <p:outputLabel for="@next" value="Select Radios"/>-->
+                    <!--                        <p:selectOneRadio value="TODO Faces EL">-->
+                    <!--                            <f:selectItems value="TODO Faces EL"-->
+                    <!--                                           var="currentSelectItem"-->
+                    <!--                                           itemLabel="#{currentSelectItem}"-->
+                    <!--                                           itemValue="#{currentSelectItem}" />-->
+                    <!--                        </p:selectOneRadio>-->
+                    <!--                    </div>-->
+
+                    <!--                    <div class="field">-->
+                    <!--                        <p:selectBooleanCheckbox  id="booleanCheckbox"-->
+                    <!--                                                  itemLabel="Check me out"-->
+                    <!--                                                  value="TODO Faces EL"/>-->
+                    <!--                    </div>-->
+
+                    <!--                    <div class="field col-12 md:col-2">-->
+                    <!--                        <p:outputLabel for="dateValue" >Date Value</p:outputLabel>-->
+                    <!--                        <p:datePicker id="dateValue"-->
+                    <!--                                      value=""-->
+                    <!--                                      pattern="yyyy-MM-dd"-->
+                    <!--                                      showIcon="true"-->
+                    <!--                                      monthNavigator="true"-->
+                    <!--                                      yearNavigator="true"-->
+                    <!--                        >-->
+                    <!--                            <f:convertDateTime type="localDate" pattern="yyyy-MM-dd" />-->
+                    <!--                        </p:datePicker>-->
+                    <!--                    </div>-->
+
+                        <div class="formgroup-inline">
+                            <div class="field">
+                                <p:commandButton value="Roll Dice"
+                                                 action="#{currentDiceRollViewScopedView.onRollDice()}"
+                                                 update=":messages outputPanel"
+                                >
+                                </p:commandButton>
+                            </div>
+
+                            <div class="field">
+                                <p:commandButton value="Clear"
+                                                 update="@form outputPanel"
+                                                 action="#{currentDiceRollViewScopedView.onClear()}"
+                                                 styleClass="ui-button-secondary"
+                                >
+                                </p:commandButton>
+                            </div>
+                        </div>
+
+                </div>
+
+            </p:panel>
+
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>
