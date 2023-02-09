@@ -27,6 +27,21 @@ public class Rectangle {
      * @return area of this rectangle
      */
     public double area() {
+//        try {
+//            try (var reader = new BufferedReader(new InputStreamReader(
+//                    getClass().getResourceAsStream("/data/csv/CanadianPersonalIncomeTaxRates.csv")))) {
+//                // Skip the first line as it contains headers
+//                reader.readLine();
+//                String line;
+//
+//                while ( (line = reader.readLine()) != null) {
+//
+//                }
+//
+//            }
+//        } catch (Exception ex) {
+//            throw new RuntimeException(ex);
+//        }
         return width * length;
     }
 
