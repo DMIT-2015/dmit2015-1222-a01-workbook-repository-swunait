@@ -142,7 +142,7 @@ public class MovieSeleniumIT {
     @Test
     void shouldDetails() {
         // TODO: change the editId value to a valid entity
-        Long primaryKeyValue = 2;
+        Long primaryKeyValue = 2L;
         driver.get("http://localhost:8080/movies/details.xhtml?editId=" + primaryKeyValue);
         assertEquals("Movie - Details", driver.getTitle());
 
