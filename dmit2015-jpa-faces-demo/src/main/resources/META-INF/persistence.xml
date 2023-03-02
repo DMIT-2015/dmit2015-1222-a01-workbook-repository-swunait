@@ -4,19 +4,19 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
              version="3.1">
 
-    <persistence-unit name="h2database-jpa-pu" transaction-type="JTA">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <jta-data-source>java:app/datasources/h2databaseDS</jta-data-source>
+<!--    <persistence-unit name="h2database-jpa-pu" transaction-type="JTA">-->
+<!--        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>-->
+<!--        <jta-data-source>java:app/datasources/h2databaseDS</jta-data-source>-->
 
-        <properties>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+<!--        <properties>-->
+<!--            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
 
-            <!-- database.action: drop-and-create, create, update, none -->
-            <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
-            <!-- <property name="jakarta.persistence.sql-load-script-source" value="META-INF/sql/import-data.sql" /> -->
+<!--            &lt;!&ndash; database.action: drop-and-create, create, update, none &ndash;&gt;-->
+<!--            <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>-->
+<!--            &lt;!&ndash; <property name="jakarta.persistence.sql-load-script-source" value="META-INF/sql/import-data.sql" /> &ndash;&gt;-->
 
-        </properties>
-    </persistence-unit>
+<!--        </properties>-->
+<!--    </persistence-unit>-->
 
     <!--    <persistence-unit name="local-mssql-dmit2015-jpa-pu" transaction-type="JTA">-->
     <!--        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>-->
@@ -55,16 +55,16 @@
     <!--    </persistence-unit>-->
 
 
-    <!--    <persistence-unit name="oracle-jpa-user2015-pu" transaction-type="JTA">-->
-    <!--        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>-->
-    <!--        <jta-data-source>java:app/datasources/oracleUser2015DS</jta-data-source>-->
+        <persistence-unit name="oracle-jpa-user2015-pu" transaction-type="JTA">
+            <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+            <jta-data-source>java:app/datasources/oracleUser2015DS</jta-data-source>
 
-    <!--        <properties>-->
-    <!--            <property name="hibernate.dialect" value="org.hibernate.dialect.OraclecDialect"/>-->
+            <properties>
+                <property name="hibernate.dialect" value="org.hibernate.dialect.OracleDialect"/>
 
-    <!--            <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>-->
-    <!--        </properties>-->
-    <!--    </persistence-unit>-->
+                <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+            </properties>
+        </persistence-unit>
 
     <!--    <persistence-unit name="oracle-jpa-hr-pu" transaction-type="JTA">-->
     <!--        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>-->

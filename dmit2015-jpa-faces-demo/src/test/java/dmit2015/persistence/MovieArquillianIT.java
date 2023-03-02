@@ -23,6 +23,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,195 +41,168 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(ArquillianExtension.class)
 public class MovieArquillianIT { // The class must be declared as public
 
-    static String mavenArtifactIdId;
-
-    @Deployment
-    public static WebArchive createDeployment() throws IOException, XmlPullParserException {
-        PomEquippedResolveStage pomFile = Maven.resolver().loadPomFromFile("pom.xml");
-        MavenXpp3Reader reader = new MavenXpp3Reader();
-        Model model = reader.read(new FileReader("pom.xml"));
-        mavenArtifactIdId = model.getArtifactId();
-        final String archiveName = model.getArtifactId() + ".war";
-        return ShrinkWrap.create(WebArchive.class, archiveName)
-                .addAsLibraries(pomFile.resolve("org.codehaus.plexus:plexus-utils:3.4.2").withTransitivity().asFile())
-                .addAsLibraries(pomFile.resolve("org.hamcrest:hamcrest:2.2").withTransitivity().asFile())
-                .addAsLibraries(pomFile.resolve("com.h2database:h2:2.1.214").withTransitivity().asFile())
-                .addAsLibraries(pomFile.resolve("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre17").withTransitivity().asFile())
-//                .addAsLibraries(pomFile.resolve("com.oracle.database.jdbc:ojdbc11:21.8.0.0").withTransitivity().asFile())
-//                .addAsLibraries(pomFile.resolve("org.hibernate.orm:hibernate-spatial:6.1.7.Final").withTransitivity().asFile())
-                .addClass(ApplicationConfig.class)
-                .addClasses(MoviesApplicationStartupListener.class)
-                .addClasses(Movie.class, MovieRepository.class)
-                // TODO: Add any additional classes or resource files required
-                .addAsResource("data/csv/movies.csv")
-                .addAsResource("META-INF/persistence.xml")
-                .addAsResource("META-INF/beans.xml");
-    }
-
     @Inject
     private MovieRepository _movieRepository;
 
     @Resource
     private UserTransaction _beanManagedTransaction;
 
-    @BeforeAll
-    static void beforeAllTestMethod() {
-        // code to execute before test methods are executed
+    @Deployment
+    public static WebArchive createDeployment() {
+        PomEquippedResolveStage pomFile = Maven.resolver().loadPomFromFile("pom.xml");
+
+        return ShrinkWrap.create(WebArchive.class, "test.war")
+                .addAsLibraries(pomFile.resolve("com.h2database:h2:2.1.214").withTransitivity().asFile())
+                .addAsLibraries(pomFile.resolve("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre17").withTransitivity().asFile())
+                .addAsLibraries(pomFile.resolve("com.oracle.database.jdbc:ojdbc11:21.8.0.0").withTransitivity().asFile())
+                .addAsLibraries(pomFile.resolve("org.hibernate.orm:hibernate-spatial:6.1.7.Final").withTransitivity().asFile())
+                .addAsLibraries(pomFile.resolve("org.hamcrest:hamcrest:2.2").withTransitivity().asFile())
+                .addClass(ApplicationConfig.class)
+                .addClasses(MoviesApplicationStartupListener.class)
+                .addClasses(Movie.class, MovieRepository.class)
+                .addAsResource("data/csv/movies.csv")
+                .addAsResource("META-INF/persistence.xml")
+                .addAsResource("META-INF/beans.xml");
     }
 
-    @BeforeEach
-    void beforeEachTestMethod() {
-        // Code to execute before each method such as creating the test data
+    @Order(3)
+    @Test
+    void shouldCreate() throws SystemException, NotSupportedException {
+        _beanManagedTransaction.begin();
+        // Arrange
+        Movie newMovie = new Movie();
+        newMovie.setGenre("Horror");
+        newMovie.setPrice(BigDecimal.valueOf(19.99));
+        newMovie.setRating("NC-17");
+        newMovie.setTitle("The Return of the Java Master");
+        newMovie.setReleaseDate(LocalDate.parse("2021-01-21"));
+        // Act
+        _movieRepository.add(newMovie);
+        // Assert
+        Optional<Movie> optionalMovie = _movieRepository.findById(newMovie.getId());
+        assertTrue(optionalMovie.isPresent());
+        Movie existingMovie = optionalMovie.orElseThrow();
+        assertNotNull(existingMovie);
+        assertEquals(newMovie.getTitle(), existingMovie.getTitle());
+        assertEquals(newMovie.getGenre(), existingMovie.getGenre());
+        assertEquals(newMovie.getPrice(), existingMovie.getPrice());
+        assertEquals(newMovie.getRating(), existingMovie.getRating());
+        assertEquals(newMovie.getReleaseDate(), existingMovie.getReleaseDate());
+
+        long createTimeDifference = newMovie.getCreateTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
+        assertEquals(0, createTimeDifference);
+
+        assertNull(newMovie.getUpdateTime());
+
+        _beanManagedTransaction.rollback();
     }
 
-    @AfterEach
-    void afterEachTestMethod() {
-        // code to execute after each test method such as deleteing the test data
+    @Order(2)
+    @Test
+    void shouldFindOne() {
+        // Arrange
+        final Long editId = 3L;  // for Ghostbusters 2
+        // Act
+        Optional<Movie> optionalMovie = _movieRepository.findById(editId);
+        // Assert
+        assertTrue(optionalMovie.isPresent());
+        Movie existingMovie = optionalMovie.orElseThrow();
+        assertNotNull(existingMovie);
+        assertEquals("Comedy", existingMovie.getGenre());
+        assertEquals(9.99, existingMovie.getPrice().doubleValue());
+        assertEquals("PG", existingMovie.getRating());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-dd");
+        assertEquals(LocalDate.parse("1986-2-23", formatter).toString(), existingMovie.getReleaseDate().toString());
+        assertNotNull(existingMovie.getCreateTime());
     }
-
 
     @Order(1)
-    @ParameterizedTest
-    @CsvSource({
-            "4,When Harry Met Sally,Rio Bravo"
-    })
-    void findAll(int expectedSize, String firstExpectedTitle, String lastExpectedTitle) {
-        assertNotNull(_movieRepository);
-        // Arrange
-        List<Movie> movieList = _movieRepository.findAll();
-        // Act
+    @Test
+    void shouldFindAll() {
+        // Arrange and Act
+        List<Movie> queryResultList = _movieRepository.findAll();
         // Assert
-        assertEquals(expectedSize, movieList.size());
+        assertEquals(4, queryResultList.size());
 
-        // Get the first entity and compare with expected results
-        Movie firstMovie = movieList.get(0);
-        assertEquals(firstExpectedTitle, firstMovie.getTitle());
+        Movie firstMovie = queryResultList.get(0);
+        assertEquals("When Harry Met Sally", firstMovie.getTitle());
+        assertEquals("Romantic Comedy", firstMovie.getGenre());
+        assertEquals(7.99, firstMovie.getPrice().doubleValue());
+        assertEquals("G", firstMovie.getRating());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-dd");
+        assertEquals(LocalDate.parse("1989-02-12", formatter).toString(), firstMovie.getReleaseDate().toString());
 
-        // Get the last entity and compare with expected results
-        Movie lastMovie = movieList.get( movieList.size() - 1 );
-        assertEquals(lastExpectedTitle, lastMovie.getTitle());
+        Movie lastMovie = queryResultList.get(queryResultList.size() - 1);
+        assertEquals("Rio Bravo", lastMovie.getTitle());
+        assertEquals("Western", lastMovie.getGenre());
+        assertEquals(7.99, lastMovie.getPrice().doubleValue());
+        assertEquals("PG-13", lastMovie.getRating());
+        assertEquals(LocalDate.parse("1959-04-15", formatter).toString(), lastMovie.getReleaseDate().toString());
     }
 
-//    @Order(2)
-//    @ParameterizedTest
-//    @CsvSource({
-//            "primaryKey,expectedProperty1Value,expectedProperty2Value",
-//            "primaryKey,expectedProperty1Value,expectedProperty2Value"
-//    })
-//    void shouldFineOne(Long movieId, String expectedProperty1, String expectedProperty2) {
-//        // Arrange and Act
-//        Optional<Movie> optionalMovie = _movieRepository.findById(movieId);
-//        assertTrue(optionalMovie.isPresent());
-//        Movie existingMovie = optionalMovie.orElseThrow();
-//
-//        // Assert
-//        assertNotNull(existingPerson);
-//        // assertEquals(expectedProperty1, existingMovie.getProperty2());
-//
-//    }
-//
-//    @Order(3)
-//    @ParameterizedTest
-//    @CsvSource({
-//            "Property1Value, Property2Value, Property3Value",
-//            "Property1Value, Property2Value, Property3Value",
-//    })
-//    void shouldCreate(String property1, String property2, String property3) throws SystemException, NotSupportedException {
-//        _beanManagedTransaction.begin();
-//
-//        // Arrange
-//        Movie newMovie = new Movie();
-//        // newMovie.setProperty1(property1);
-//
-//        // Act
-//        _movieRepository.add(newMovie);
-//
-//        // Assert
-//
-//        _beanManagedTransaction.rollback();
-//    }
-//
-//    @Order(4)
-//    @ParameterizedTest
-//    @CsvSource({
-//            "PrimaryKey, Property1Value, Property2Value, Property3Value",
-//            "PrimaryKey, Property1Value, Property2Value, Property3Value",
-//    })
-//    void update_existingEntity_shouldPass(Long movieId, String property1, String property2, String property3) throws SystemException, NotSupportedException {
-//        _beanManagedTransaction.begin();
-//
-//        // Arrange
-//        Optional<Movie> optionalMovie = _movieRepository.findById(movieId);
-//        assertTrue(optionalMovie.isPresent());
-//        Movie existingMovie = optionalMovie.orElseThrow();
-//        assertNotNull(existingPerson);
-//
-//        // Act
-//        // existingMovie.setPropertyName("Property Value");
-//
-//        //Movie updatedMovie = _movieRepository.update(movieId, existingMovie);
-//        // Assert
-//        // assertEquals(existingMovie.getPropertyName(), updatedMovie.getPropertyName());
-//
-//        _beanManagedTransaction.rollback();
-//    }
-//
-//    @Order(5)
-//    @ParameterizedTest
-//    @CsvSource({
-//            "primaryKey1",
-//            "primaryKey2",
-//    })
-//    void deleteById_existingId_shouldPass(Long movieId) throws SystemException, NotSupportedException {
-//        _beanManagedTransaction.begin();
-//
-//        // Arrange and Act
-//        _movieRepository.deleteById(movieId);
-//
-//        // Assert
-//        assertTrue(_movieRepository.findById(movieId).isEmpty());
-//
-//        _beanManagedTransaction.rollback();
-//    }
-//
-//    @Order(6)
-//    @ParameterizedTest
-//    @CsvSource({
-//            "primaryKey",
-//            "primaryKey"
-//    })
-//    void findById_nonExistingId_shouldFail(Long movieId) {
-//        // Arrange and Act
-//        Optional<Movie> optionalMovie = _movieRepository.findById(movieId);
-//
-//        // Assert
-//        assertFalse(optionalMovie.isPresent());
-//
-//    }
-//
-//
-//    @Order(7)
-//    @ParameterizedTest
-//    @CsvSource({
-//            "Invalid Property1Value, Property2Value, Property3Value, ExpectedExceptionMessage",
-//            "Property1Value, Invalid Property2Value, Property3Value, ExpectedExceptionMessage",
-//    })
-//    void create_beanValidation_shouldFail(String property1, String property2, String property3, String expectedExceptionMessage) {
-//        // Arrange
-//        Movie newMovie = new Movie();
-//        // newMovie.setProperty1(property1);
-//        // newMovie.setProperty2(property2);
-//        // newMovie.setProperty3(property3);
-//
-//        try {
-//            // Act
-//            _movieRepository.add(newMovie);
-//            fail("An bean validation constraint should have been thrown");
-//        } catch (Exception ex) {
-//            // Assert
-////            assertEquals(expectedExceptionMessage, ex.getMessage());
-//            assertThat(ex.getMessage(), containsString(expectedExceptionMessage));
-//        }
-//    }
+    @Order(4)
+    @Test
+    void shouldUpdate() throws SystemException, NotSupportedException {
+        // Arrange - Create a new Movie then update the same Movie
+        Movie newMovie = new Movie();
+        newMovie.setGenre("Adventure");
+        newMovie.setPrice(BigDecimal.valueOf(29.99));
+        newMovie.setRating("PG");
+        newMovie.setTitle("JDK 17 Release Party");
+        newMovie.setReleaseDate(LocalDate.parse("2021-09-14"));
+        _movieRepository.add(newMovie);
+
+        final Long editId = newMovie.getId();
+        Optional<Movie> optionalMovie = _movieRepository.findById(editId);
+        assertTrue(optionalMovie.isPresent());
+        Movie existingMovie = optionalMovie.orElseThrow();
+        assertNotNull(existingMovie);
+
+        // Act - change the genre, title, rating, price, and release date
+        existingMovie.setGenre("Action");
+        existingMovie.setTitle("JDK 18 Release Party");
+        existingMovie.setRating("PG-13");
+        existingMovie.setPrice(BigDecimal.valueOf(19.99));
+        existingMovie.setReleaseDate(LocalDate.parse("2022-03-22"));
+        _movieRepository.update(editId, existingMovie);
+
+        // Assert
+        Optional<Movie> optionalUpdatedMovie = _movieRepository.findById(existingMovie.getId());
+        assertTrue(optionalUpdatedMovie.isPresent());
+        Movie updatedMovie = optionalUpdatedMovie.orElseThrow();
+        System.out.println("Updated movie: "  + updatedMovie);
+        assertNotNull(updatedMovie);
+        assertEquals(existingMovie.getTitle(), updatedMovie.getTitle());
+        assertEquals(existingMovie.getGenre(), updatedMovie.getGenre());
+        assertEquals(existingMovie.getPrice().doubleValue(), updatedMovie.getPrice().doubleValue());
+        assertEquals(existingMovie.getRating(), updatedMovie.getRating());
+        assertEquals(existingMovie.getReleaseDate(), updatedMovie.getReleaseDate());
+
+        assertNotNull(updatedMovie.getUpdateTime());
+        long updateTimeDifference = updatedMovie.getUpdateTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
+        assertEquals(0, updateTimeDifference);
+
+        // Delete the entity that was added to test the update method
+        _movieRepository.delete(updatedMovie);
+    }
+
+    @Order(5)
+    @Test
+    void shouldDelete() throws SystemException, NotSupportedException {
+        _beanManagedTransaction.begin();
+        // Arrange
+        final Long editId = 3L;  // for Ghostbusters 2
+        Optional<Movie> optionalMovie = _movieRepository.findById(editId);
+        assertTrue(optionalMovie.isPresent());
+        Movie existingMovie = optionalMovie.orElseThrow();
+        assertNotNull(existingMovie);
+        // Act
+        _movieRepository.delete(existingMovie);
+        optionalMovie = _movieRepository.findById(editId);
+        // Assert
+        assertTrue(optionalMovie.isEmpty());
+
+        _beanManagedTransaction.rollback();
+    }
 
 }
