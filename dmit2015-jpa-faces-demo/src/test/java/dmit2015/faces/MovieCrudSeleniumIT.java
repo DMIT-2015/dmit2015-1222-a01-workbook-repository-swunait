@@ -112,7 +112,7 @@ public class MovieCrudSeleniumIT {
             String expectedLastRowGenre,
             String expectedLastRowRating,
             String expectedLastRowPrice,
-            String expectedLastRowReleaseDate) {
+            String expectedLastRowReleaseDate) throws InterruptedException {
         // Open a browser and navigate to the page to list entities
         driver.get("http://localhost:8080/movies/index.xhtml");
         assertEquals("Movie - List", driver.getTitle());
@@ -141,11 +141,15 @@ public class MovieCrudSeleniumIT {
         assertEquals(expectedLastRowPrice, lastRowPrice);
         assertEquals(expectedLastRowReleaseDate, lastRowReleaseDate);
 
+        Thread.sleep(1000);
+
         // Verify that clicking on the edit link navigates to the Edit Movie page
         driver.findElements(By.xpath("//a[contains(@id,'editLink')]")).get(0).click();
         assertEquals("Movie - Edit", driver.getTitle());
         // Navigate back to the listing page
         driver.navigate().back();
+
+        Thread.sleep(1000);
 
         // Verify that clicking on the details link navigates to the Edit Details page
         driver.findElements(By.xpath("//a[contains(@id,'detailsLink')]")).get(0).click();
@@ -153,11 +157,15 @@ public class MovieCrudSeleniumIT {
         // Navigate back to the listing page
         driver.navigate().back();
 
+        Thread.sleep(1000);
+
         // Verify that clicking on the delete link navigates to the Delete Movie page
         driver.findElements(By.xpath("//a[contains(@id,'deleteLink')]")).get(0).click();
         assertEquals("Movie - Delete", driver.getTitle());
         // Navigate back to the listing page
         driver.navigate().back();
+
+        Thread.sleep(1000);
     }
 
     @Order(3)
@@ -192,7 +200,7 @@ public class MovieCrudSeleniumIT {
     @Order(4)
     @ParameterizedTest
     @CsvSource({
-            "Java 19 Release Party,Action,G,9.20,'Sep 20, 2021'",
+            "Java 19 Release Party,Action,G,9.20,'2021-09-22'",
     })
     void shouldEditMovie(String updatedTitle, String updatedGenre, String updatedRating, String updatedPrice, String updatedReleaseDate) {
         driver.get("http://localhost:8080/movies/index.xhtml");
@@ -202,7 +210,7 @@ public class MovieCrudSeleniumIT {
         int lastRowIndex = tableRowCount - 1;
 
         driver.findElements(By.xpath("//a[contains(@id,'editLink')]")).get(lastRowIndex).click();
-        assertEquals("Edit Movie", driver.getTitle());
+        assertEquals("Movie - Edit", driver.getTitle());
 
         setValue("title",updatedTitle);
         setValue("genre",updatedGenre);
