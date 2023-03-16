@@ -205,4 +205,13 @@ public class MovieArquillianIT { // The class must be declared as public
         _beanManagedTransaction.rollback();
     }
 
+    @Order(6)
+    @ParameterizedTest
+    @CsvSource({
+            "Action",
+            ""
+    })
+    void shouldSelectGenre() throws SystemException, NotSupportedException {
+
+    }
 }

@@ -2,10 +2,13 @@ package dmit2015.persistence;
 
 import dmit2015.entity.Movie;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.security.enterprise.SecurityContext;
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,9 +18,18 @@ public class MovieRepository {
     @PersistenceContext
     private EntityManager em;
 
+    @Inject
+    private SecurityContext _securityContext;
+
     @Transactional
     public void add(Movie newMovie) {
-        em.persist(newMovie);
+        if (_securityContext.isCallerInRole("Sales")) {
+            String username = _securityContext.getCallerPrincipal().getName();
+            newMovie.setUsername(username);
+            em.persist(newMovie);
+        } else {
+            throw new RuntimeException("Access denied. You do have permission to execute this method.");
+        }
     }
 
     public Optional<Movie> findById(Long movieId) {
@@ -34,8 +46,20 @@ public class MovieRepository {
     }
 
     public List<Movie> findAll() {
-        return em.createQuery("SELECT o FROM Movie o ", Movie.class)
-                .getResultList();
+//        return em.createQuery("SELECT o FROM Movie o ", Movie.class)
+//                .getResultList();
+        List<Movie> resultList = null;
+        if (_securityContext.getCallerPrincipal().getName().equalsIgnoreCase("anonymous") ) {
+//            throw new RuntimeException("Access Denied. Anonymous users do not have permission to access this method.");
+            resultList = new ArrayList<>();
+        } else if (_securityContext.isCallerInRole("Executive") || _securityContext.isCallerInRole("Administration") ) {
+            resultList = em.createQuery("SELECT m FROM Movie m", Movie.class).getResultList();
+        } else {
+            String username = _securityContext.getCallerPrincipal().getName();
+            resultList = em.createQuery("SELECT m FROM Movie m WHERE m.username = :usernameParam", Movie.class)
+                    .setParameter("usernameParam", username).getResultList();
+        }
+        return resultList;
     }
 
     @Transactional

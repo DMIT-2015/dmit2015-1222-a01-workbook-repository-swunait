@@ -17,6 +17,10 @@
     <ui:param name="title" value="Movie - List"/>
 
     <ui:define name="maincontent">
+        <f:metadata>
+            <f:viewParam name="dummy" />
+            <f:event type="postInvokeAction" listener="#{currentMovieListView.init()}" />
+        </f:metadata>
 
         <h1>Movie List</h1>
 
@@ -76,6 +80,11 @@
                          <!-- Reference example on how to format output using custom date format or custom number format
                         <f:convertNumber type="currency" locale="en_CA"/>
                         -->
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Username">
+                    <h:outputText value="#{currentItem.username}">
                     </h:outputText>
                 </p:column>
 

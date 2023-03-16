@@ -1,0 +1,52 @@
+### Create a new document
+POST https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo.json
+Content-Type: application/json
+
+{
+  "task": "Buy Large Coffee",
+  "important": true
+}
+
+### Create a new document
+POST https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo.json
+Content-Type: application/json
+
+{
+  "task": "Drink Coffee",
+  "important": true,
+  "completed": true
+}
+
+### Create a new document
+POST https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo.json
+Content-Type: application/json
+
+{
+  "task": "Do daily morning exercise"
+}
+### GET All documents
+GET https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo.json
+
+### GET One document by key
+GET https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo/-NQeuA9GqvxL8MbKo6k2.json
+
+### UPDATE document - will replace all properties with the properties in the request body - if you miss a property it will be removed
+PUT https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo/-NQeuA9GqvxL8MbKo6k2.json
+Content-Type: application/json
+
+{
+  "completed": false,
+  "task": "Drink Coffee"
+}
+
+### DELETE document - use this if you want to delete a document
+DELETE https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo/-NQeuhQrwhRAEIMBumZN.json
+
+
+### PATCH document - use this if you want to update some of the properties but not all of them
+PATCH https://dmit2015-1222-swu-a01-default-rtdb.firebaseio.com/Todo/-NQeuA9GqvxL8MbKo6k2.json
+Content-Type: application/json
+
+{
+  "completed": false
+}

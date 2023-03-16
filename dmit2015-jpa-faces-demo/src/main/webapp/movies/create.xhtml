@@ -55,10 +55,10 @@
 
                     <div class="field">
                         <p:outputLabel for="@next">genre</p:outputLabel>
-                        <p:inputText
-                                id="genre"
-                                value="#{currentMovieCreateView.newMovie.genre}">
-                        </p:inputText>
+                        <p:selectOneMenu id="genre" value="#{currentMovieCreateView.selectedGenre}">
+                            <f:selectItem itemLabel="--- select a genre---" itemValue="" />
+                            <f:selectItems value="#{currentMovieCreateView.availableGenres}" />
+                        </p:selectOneMenu>
                     </div>
 
                     <div class="field">

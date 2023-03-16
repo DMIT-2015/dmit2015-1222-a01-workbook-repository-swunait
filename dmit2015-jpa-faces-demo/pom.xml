@@ -192,6 +192,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.directory.api</groupId>
+            <artifactId>api-all</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -214,10 +220,18 @@
                     <!--                    <feature-pack-location>wildfly-preview@maven(org.jboss.universe:community-universe)</feature-pack-location>-->
                     <layers>
                         <!-- https://docs.wildfly.org/27/Bootable_Guide.html#wildfly_layers -->
-                        <layer>jpa</layer>
+                        <layer>cloud-server</layer>
                         <layer>jsf</layer>
                         <layer>h2-driver</layer>
+                        <layer>undertow-https</layer>
                     </layers>
+                    <cli-sessions>
+                        <cli-session>
+                            <script-files>
+                                <script>/home/user2015/jdk/server/wildfly-scripts/configure-elytron.cli</script>
+                            </script-files>
+                        </cli-session>
+                    </cli-sessions>
                     <excluded-layers>
                         <layer>deployment-scanner</layer>
                     </excluded-layers>
