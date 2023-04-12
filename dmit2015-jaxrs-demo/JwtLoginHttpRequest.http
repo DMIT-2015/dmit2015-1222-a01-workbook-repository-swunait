@@ -1,5 +1,5 @@
 ### GET a JWT Token for user DLEE
-POST http://localhost:8080/restapi/jwt/ldapJsonLogin
+POST https://localhost:8443/restapi/jwt/ldapJsonLogin
 Content-Type:application/json
 
 {
@@ -8,7 +8,7 @@ Content-Type:application/json
 }
 
 ### GET a JWT Token for user DAUSTIN
-POST http://localhost:8080/restapi/jwt/ldapJsonLogin
+POST https://localhost:8443/restapi/jwt/ldapJsonLogin
 Content-Type:application/json
 
 {

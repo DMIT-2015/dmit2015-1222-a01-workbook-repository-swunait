@@ -3,6 +3,7 @@ package common.config;
 import jakarta.annotation.sql.DataSourceDefinition;
 import jakarta.annotation.sql.DataSourceDefinitions;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.security.enterprise.identitystore.LdapIdentityStoreDefinition;
 
 @DataSourceDefinitions({
 
@@ -37,6 +38,16 @@ import jakarta.enterprise.context.ApplicationScoped;
 //		password="RemotePassword.YourNaitStudentId"),
 
 })
+
+@LdapIdentityStoreDefinition(
+		url = "ldap://192.168.182.134:389",
+		callerSearchBase = "ou=Departments,dc=dmit2015,dc=ca",
+		callerNameAttribute = "SamAccountName", // SamAccountName or UserPrincipalName
+		groupSearchBase = "ou=Departments,dc=dmit2015,dc=ca",
+		bindDn = "cn=DAUSTIN,ou=IT,ou=Departments,dc=dmit2015,dc=ca",
+		bindDnPassword = "Password2015",
+		priority = 5
+)
 
 @ApplicationScoped
 public class ApplicationConfig {
