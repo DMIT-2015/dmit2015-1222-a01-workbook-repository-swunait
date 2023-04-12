@@ -4,9 +4,11 @@ import common.validator.BeanValidator;
 import dmit2015.entity.TodoItem;
 import dmit2015.repository.TodoItemRepository;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -63,8 +65,8 @@ import java.util.Optional;
 @Produces(MediaType.APPLICATION_JSON)	// All methods returns data that has been converted to JSON format
 public class TodoItemResource {
 
-//    @Inject
-//    private JsonWebToken _callerPrincipal;
+    @Inject
+    private JsonWebToken _callerPrincipal;
 
 
     @Context
@@ -73,7 +75,7 @@ public class TodoItemResource {
     @Inject
     private TodoItemRepository todoItemRepository;
 
-//    @RolesAllowed({"Sales","IT"})
+    @RolesAllowed({"Sales","IT"})
     @POST   // POST: /restapi/TodoItems
     public Response postTodoItem(TodoItem newTodoItem) {
         if (newTodoItem == null) {
@@ -88,8 +90,8 @@ public class TodoItemResource {
                     .build();
         }
 
-//        String username = _callerPrincipal.getName();
-//        newTodoItem.setUsername(username);
+        String username = _callerPrincipal.getName();
+        newTodoItem.setUsername(username);
 
         todoItemRepository.add(newTodoItem);
         URI todoItemsUri = uriInfo.getAbsolutePathBuilder().path(newTodoItem.getId().toString()).build();
@@ -111,9 +113,9 @@ public class TodoItemResource {
 
     @GET    // GET: /restapi/TodoItems
     public Response getTodoItems() {
-//        String username = _callerPrincipal.getName();
-        return Response.ok(todoItemRepository.findAll()).build();
-//        return Response.ok(todoItemRepository.findAllByUsername(username)).build();
+        String username = _callerPrincipal.getName();
+//        return Response.ok(todoItemRepository.findAll()).build();
+        return Response.ok(todoItemRepository.findAllByUsername(username)).build();
     }
 
     @PUT    // PUT: /restapi/TodoItems/5
@@ -157,7 +159,7 @@ public class TodoItemResource {
         return Response.ok(existingTodoItem).build();
     }
 
-//    @RolesAllowed({"IT"})
+    @RolesAllowed({"IT"})
     @DELETE // DELETE: /restapi/TodoItems/5
     @Path("{id}")
     public Response deleteTodoItem(@PathParam("id") Long id) {

@@ -1,0 +1,17 @@
+### GET a JWT Token for user DLEE
+POST http://localhost:8080/restapi/jwt/ldapJsonLogin
+Content-Type:application/json
+
+{
+  "username": "DLEE",
+  "password":"Password2015"
+}
+
+### GET a JWT Token for user DAUSTIN
+POST http://localhost:8080/restapi/jwt/ldapJsonLogin
+Content-Type:application/json
+
+{
+  "username": "DAUSTIN",
+  "password":"Password2015"
+}
