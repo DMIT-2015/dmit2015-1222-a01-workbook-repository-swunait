@@ -49,15 +49,15 @@ public interface TodoMpRestClient {
     List<Todo> findAll();
 
     @GET
-    @Path( "/{key}.json")
+    @Path( "/{key}")
     Todo findById(@PathParam("key") Long key);
 
     @PUT
-    @Path( "/{key}.json")
+    @Path( "/{key}")
     Todo update(@PathParam("key") Long key, Todo updatedTodo);
 
     @DELETE
-    @Path("/{key}.json")
+    @Path("/{key}")
     void delete(@PathParam("key") Long key);
 
 }

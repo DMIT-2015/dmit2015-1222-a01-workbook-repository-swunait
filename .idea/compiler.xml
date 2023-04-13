@@ -9,8 +9,5 @@
         <module name="dmit2015-faces-demo" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="dmit2015-faces-demo" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>
