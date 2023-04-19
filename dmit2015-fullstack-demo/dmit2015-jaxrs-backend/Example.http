@@ -1,0 +1,12 @@
+# curl -X POST https://localhost:8443/backend/restapi/jwt/jsonLogin -d '{"username":"user01@dmit2015.ca","password":"Password2015"}' -H 'Content-Type:application/json'
+POST https://localhost:8443/backend/restapi/jwt/jsonLogin
+Content-Type: application/json
+
+{
+  "username": "user01@dmit2015.ca",
+  "password": "Password2015"
+}
+
+###
+
+
